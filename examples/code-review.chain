@@ -1,0 +1,15 @@
+name: Code Review Pipeline
+model: claude-haiku-4-5-20251001
+input: {{CODE}}
+
+[analyze]
+prompt: Analyze this code and provide a structured overview of what it does, its architecture, and key patterns used: {{CODE}}
+max_tokens: 500
+
+[security-check]
+prompt: Perform a security review of this code analysis and original code. Identify potential vulnerabilities, injection risks, authentication issues, or data exposure problems. Reference the analysis: {{analyze}}. Original code: {{CODE}}
+max_tokens: 500
+
+[suggest-improvements]
+prompt: Based on this code analysis: {{analyze}} and security findings: {{security-check}}, provide a prioritized list of concrete improvement suggestions. Include code snippets where helpful. Focus on the most impactful changes.
+max_tokens: 800

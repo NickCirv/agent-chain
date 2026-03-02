@@ -1,0 +1,19 @@
+name: Blog Post Pipeline
+model: claude-haiku-4-5-20251001
+input: {{TOPIC}}
+
+[research]
+prompt: Research {{TOPIC}} and provide 5 key facts, statistics, and unique angles. Be concise and factual.
+max_tokens: 500
+
+[outline]
+prompt: Create a blog post outline based on this research: {{previous}}. Include intro, 3 main sections with subpoints, and conclusion.
+max_tokens: 300
+
+[write]
+prompt: Write a full blog post from this outline: {{previous}}. Aim for 800 words, use a conversational tone, and make it engaging.
+max_tokens: 1200
+
+[seo]
+prompt: Improve this blog post for SEO. Add a compelling meta description (155 chars max), improve headers with keywords, suggest 5 target keywords, and highlight any on-page SEO improvements: {{previous}}
+max_tokens: 600

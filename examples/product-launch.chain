@@ -1,0 +1,15 @@
+name: Product Launch Pipeline
+model: claude-haiku-4-5-20251001
+input: {{PRODUCT}}
+
+[research-market]
+prompt: Research the market for {{PRODUCT}}. Identify target audience, key competitors, pricing landscape, main pain points solved, and unique selling propositions. Be specific and actionable.
+max_tokens: 600
+
+[write-copy]
+prompt: Write compelling product launch copy for {{PRODUCT}} based on this market research: {{previous}}. Include: hero headline, subheadline, 3 key benefits (feature → benefit → outcome format), social proof placeholder, and a strong CTA. Conversion-focused.
+max_tokens: 700
+
+[write-emails]
+prompt: Create a 3-email launch sequence for {{PRODUCT}} using this copy as reference: {{write-copy}}. Email 1: Pre-launch teaser (builds curiosity). Email 2: Launch day (urgency + value). Email 3: Last chance (3 days after launch, FOMO). Each email needs subject line, preview text, and body.
+max_tokens: 1000

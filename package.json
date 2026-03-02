@@ -1,0 +1,10 @@
+{
+  "name": "agent-chain",
+  "version": "1.0.0",
+  "description": "Chain Claude AI prompts into pipelines. research → write → edit → translate. One command.",
+  "type": "module",
+  "bin": { "agent-chain": "./index.js" },
+  "keywords": ["ai", "claude", "agents", "pipeline", "cli", "automation", "anthropic"],
+  "license": "MIT",
+  "engines": { "node": ">=18" }
+}

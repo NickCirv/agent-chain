@@ -1,3 +1,5 @@
+![Banner](banner.svg)
+
 # agent-chain 🔗
 
 Chain Claude AI prompts into pipelines.

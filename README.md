@@ -1,57 +1,46 @@
-![Banner](banner.svg)
+<div align="center">
 
-# agent-chain 🔗
+# agent-chain
 
-Chain Claude AI prompts into pipelines.
+**Run multi-step Claude AI pipelines from a single command — research → write → edit → publish.**
 
-```
-[research] → [outline] → [write] → [seo]
-```
+[![License: MIT](https://img.shields.io/badge/license-MIT-0B0A09?labelColor=0B0A09&color=white)](LICENSE)
+[![Zero dependencies](https://img.shields.io/badge/dependencies-0-0B0A09?labelColor=0B0A09&color=white)](package.json)
+[![Node >=18](https://img.shields.io/badge/node-%3E%3D18-0B0A09?labelColor=0B0A09&color=white)](package.json)
 
-One command. Sequential AI agents. Each step builds on the last.
-
----
+</div>
 
 ## Install
 
 ```bash
-npm install -g agent-chain
-# or run directly
-npx agent-chain run --chain blog.chain --input "AI in healthcare"
+npx github:NickCirv/agent-chain --help
 ```
 
-**Zero dependencies.** Uses only Node.js built-ins (`fs`, `path`, `https`).
+No global install required. Needs `ANTHROPIC_API_KEY` to execute; without it, dry-run mode activates automatically.
 
----
-
-## Quick Start
+## Usage
 
 ```bash
-# Dry-run (no API key needed — shows prompts without calling API)
-node index.js dry-run --chain examples/blog.chain --input "AI in healthcare"
+# Preview prompts without making API calls
+npx github:NickCirv/agent-chain dry-run --chain examples/blog.chain --input "AI in healthcare"
 
-# Full run (requires ANTHROPIC_API_KEY)
+# Execute a full pipeline (requires ANTHROPIC_API_KEY)
 export ANTHROPIC_API_KEY=sk-ant-...
-node index.js run --chain examples/blog.chain --input "AI in healthcare"
+npx github:NickCirv/agent-chain run --chain examples/blog.chain --input "AI in healthcare"
 ```
-
----
-
-## Commands
 
 | Command | Description |
 |---------|-------------|
-| `agent-chain run --chain FILE --input TEXT` | Execute a pipeline |
-| `agent-chain run --chain FILE` | Run and prompt for input |
-| `agent-chain dry-run --chain FILE --input TEXT` | Preview prompts without API calls |
-| `agent-chain list` | List all `.chain` files in current directory |
-| `agent-chain new NAME` | Scaffold a new chain file |
+| `run --chain FILE --input TEXT` | Execute a pipeline |
+| `dry-run --chain FILE --input TEXT` | Preview prompts without API calls |
+| `list` | List `.chain` files in current directory |
+| `new NAME` | Scaffold a new chain file |
 
----
+## What it does
 
-## Chain File Format
+`agent-chain` reads a `.chain` file — a lightweight plain-text format — and runs each named step sequentially through Claude, passing each step's output into the next via `{{previous}}` substitution. Results are saved per-step to `./chain-output/<name>-<timestamp>/` alongside a `_combined.txt`. After each run it prints token usage and an estimated cost.
 
-A `.chain` file is a simple text format — no YAML library required.
+### Chain file format
 
 ```
 name: Blog Post Pipeline
@@ -59,137 +48,26 @@ model: claude-haiku-4-5-20251001
 input: {{TOPIC}}
 
 [research]
-prompt: Research {{TOPIC}} and provide 5 key facts, statistics, and unique angles. Be concise.
+prompt: Research {{TOPIC}} and provide 5 key facts and unique angles.
 max_tokens: 500
 
-[outline]
-prompt: Create a blog post outline based on this research: {{previous}}. Include intro, 3 main sections, conclusion.
-max_tokens: 300
-
 [write]
-prompt: Write a full blog post from this outline: {{previous}}. 800 words, conversational tone.
+prompt: Write an 800-word blog post from this research: {{previous}}
 max_tokens: 1200
 
 [seo]
-prompt: Improve this for SEO. Add meta description, improve headers, add keyword suggestions: {{previous}}
+prompt: Improve this post for SEO. Add meta description and keyword suggestions: {{previous}}
 max_tokens: 600
 ```
 
-### Substitutions
-
-| Placeholder | What it becomes |
-|-------------|----------------|
+| Placeholder | Value |
+|-------------|-------|
 | `{{previous}}` | Output of the immediately preceding step |
 | `{{STEP_NAME}}` | Output of any named step (e.g. `{{research}}`) |
-| `{{INPUT}}` | The user's initial input text |
-| `{{TOPIC}}` | Any custom placeholder defined in `input:` header |
+| `{{INPUT}}` | The user's initial input |
+
+Three example chains are included in `examples/`: `blog.chain`, `code-review.chain`, `product-launch.chain`.
 
 ---
 
-## Example Chains
-
-### Blog Post Pipeline (`examples/blog.chain`)
-
-```
-[research] → [outline] → [write] → [seo]
-```
-
-Turn a topic into a fully SEO-optimised blog post in one command.
-
-```bash
-node index.js run --chain examples/blog.chain --input "The future of remote work"
-```
-
----
-
-### Code Review Pipeline (`examples/code-review.chain`)
-
-```
-[analyze] → [security-check] → [suggest-improvements]
-```
-
-Multi-perspective code review: architecture analysis, security audit, then prioritised improvements.
-
-```bash
-node index.js run --chain examples/code-review.chain --input "$(cat my-script.js)"
-```
-
----
-
-### Product Launch Pipeline (`examples/product-launch.chain`)
-
-```
-[research-market] → [write-copy] → [write-emails]
-```
-
-Market research → landing page copy → 3-email launch sequence. All from one product description.
-
-```bash
-node index.js run --chain examples/product-launch.chain --input "A Notion template for solopreneurs"
-```
-
----
-
-## Output Format
-
-Results are saved to `./chain-output/<pipeline-name>-<timestamp>/`:
-
-```
-chain-output/
-  blog-post-pipeline-2025-01-15T10-30-00/
-    research.txt
-    outline.txt
-    write.txt
-    seo.txt
-    _combined.txt          ← all steps merged
-```
-
----
-
-## API Setup
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-api03-...
-```
-
-**No API key?** `agent-chain` automatically switches to **dry-run mode** — it shows you exactly what prompts would be sent, with all substitutions resolved.
-
-### Models
-
-Any Anthropic model works. Set in your `.chain` file:
-
-```
-model: claude-haiku-4-5-20251001      # fast, cheap (default)
-model: claude-sonnet-4-5              # smarter
-model: claude-opus-4-5                # most capable
-```
-
----
-
-## Cost Estimates
-
-After each run, `agent-chain` shows token usage and estimated cost:
-
-```
-Token usage:
-  Input tokens:  1,847
-  Output tokens: 2,341
-  Est. cost:     $0.003398
-```
-
-Haiku (~$0.25/1M input, ~$1.25/1M output) makes multi-step pipelines extremely affordable.
-
----
-
-## Scaffold a New Chain
-
-```bash
-node index.js new my-pipeline
-# creates my-pipeline.chain with a 3-step template
-```
-
----
-
-## License
-
-MIT
+<sub>Zero dependencies · Node >=18 · MIT · by <a href="https://github.com/NickCirv">NickCirv</a></sub>

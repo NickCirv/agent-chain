@@ -1,73 +1,70 @@
-<div align="center">
+![Nicholas Ashkar — agent-chain](assets/nicholas-ashkar/banner.png)
 
 # agent-chain
 
-**Run multi-step Claude AI pipelines from a single command — research → write → edit → publish.**
+Runs a sequence of prompt steps from a .chain file, passing earlier results into later prompts.
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-0B0A09?labelColor=0B0A09&color=white)](LICENSE)
-[![Zero dependencies](https://img.shields.io/badge/dependencies-0-0B0A09?labelColor=0B0A09&color=white)](package.json)
-[![Node >=18](https://img.shields.io/badge/node-%3E%3D18-0B0A09?labelColor=0B0A09&color=white)](package.json)
 
-</div>
 
-## Install
 
-```bash
-npx github:NickCirv/agent-chain --help
-```
 
-No global install required. Needs `ANTHROPIC_API_KEY` to execute; without it, dry-run mode activates automatically.
+<a id="usage"></a>
 
-## Usage
+<a id="preview-prompts-without-making-api-calls"></a>
 
-```bash
-# Preview prompts without making API calls
-npx github:NickCirv/agent-chain dry-run --chain examples/blog.chain --input "AI in healthcare"
+<a id="execute-a-full-pipeline-requires-anthropic_api_key"></a>
 
-# Execute a full pipeline (requires ANTHROPIC_API_KEY)
-export ANTHROPIC_API_KEY=sk-ant-...
-npx github:NickCirv/agent-chain run --chain examples/blog.chain --input "AI in healthcare"
-```
-
-| Command | Description |
-|---------|-------------|
-| `run --chain FILE --input TEXT` | Execute a pipeline |
-| `dry-run --chain FILE --input TEXT` | Preview prompts without API calls |
-| `list` | List `.chain` files in current directory |
-| `new NAME` | Scaffold a new chain file |
+<a id="chain-file-format"></a>
 
 ## What it does
 
-`agent-chain` reads a `.chain` file — a lightweight plain-text format — and runs each named step sequentially through Claude, passing each step's output into the next via `{{previous}}` substitution. Results are saved per-step to `./chain-output/<name>-<timestamp>/` alongside a `_combined.txt`. After each run it prints token usage and an estimated cost.
+- Create and list chains.
+- Substitute step variables.
+- Dry-run prompt previews.
+- Save completed outputs under chain-output/.
 
-### Chain file format
 
-```
-name: Blog Post Pipeline
-model: claude-haiku-4-5-20251001
-input: {{TOPIC}}
+<a id="install"></a>
 
-[research]
-prompt: Research {{TOPIC}} and provide 5 key facts and unique angles.
-max_tokens: 500
+## Quickstart
 
-[write]
-prompt: Write an 800-word blog post from this research: {{previous}}
-max_tokens: 1200
+Prerequisites: Node.js `>=18` and npm. The checkout below pins the source used for this documentation.
 
-[seo]
-prompt: Improve this post for SEO. Add meta description and keyword suggestions: {{previous}}
-max_tokens: 600
+```sh
+git clone https://github.com/NickCirv/agent-chain.git
+cd agent-chain
+git checkout 0dcc4336f0360414f19bc26e4043f0c560025d9a
+node index.js new editorial
 ```
 
-| Placeholder | Value |
-|-------------|-------|
-| `{{previous}}` | Output of the immediately preceding step |
-| `{{STEP_NAME}}` | Output of any named step (e.g. `{{research}}`) |
-| `{{INPUT}}` | The user's initial input |
+**Expected behavior (illustrative, not captured):** Creates editorial.chain in the current directory; inspect it, then preview with dry-run --chain editorial.chain --input "A short launch note".
 
-Three example chains are included in `examples/`: `blog.chain`, `code-review.chain`, `product-launch.chain`.
+Preview the created chain before live execution:
 
----
+```sh
+node index.js dry-run --chain editorial.chain --input "A short launch note"
+```
 
-<sub>Zero dependencies · Node >=18 · MIT · by <a href="https://github.com/NickCirv">NickCirv</a></sub>
+Examples are source-inspected, **not runtime-tested**. See the research record for verification gaps.
+
+## Boundaries and data
+
+Live execution sends prompts and step output to Anthropic using ANTHROPIC_API_KEY. The chain parser is a custom format, not a general YAML engine. Cost totals use embedded estimates.
+
+## Development
+
+The manifest defines `npm test` as:
+
+```sh
+node --test
+```
+
+The captured suite is a smoke check, not end-to-end behavior coverage. Examples include “entry is valid JavaScript”, “--help exits 0”. Tests were not run for this documentation revision.
+
+See [implementation and command reference](docs/REFERENCE.md) for the package scripts and inspected interfaces, and [research record](docs/RESEARCH.md) for the pinned source, document decisions and unresolved checks.
+
+## License and contact
+
+See [LICENSE](LICENSE) for the original terms and attribution. Legal text is unchanged.
+
+[Nicholas Ashkar](https://nicholashkar.com/) · [Discuss a project](https://nicholashkar.com/#oxblood-contact)
